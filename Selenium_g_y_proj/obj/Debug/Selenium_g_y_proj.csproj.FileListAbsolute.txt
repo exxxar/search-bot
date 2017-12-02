@@ -1,0 +1,12 @@
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\Selenium_g_y_proj.exe.config
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\Selenium_g_y_proj.exe
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\Selenium_g_y_proj.pdb
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\WebDriver.dll
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\WebDriver.xml
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\obj\Debug\Selenium_g_y_proj.csprojResolveAssemblyReference.cache
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\obj\Debug\Selenium_g_y_proj.exe
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\obj\Debug\Selenium_g_y_proj.pdb
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\WebDriver.Support.dll
+c:\users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\WebDriver.Support.xml
+C:\Users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\MySql.Data.dll
+C:\Users\exxxa\onedrive\документы\visual studio 2015\Projects\Selenium_g_y_proj\Selenium_g_y_proj\bin\Debug\MySql.Data.xml
