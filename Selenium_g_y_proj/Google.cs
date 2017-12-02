@@ -79,13 +79,10 @@ namespace Selenium_g_y_proj
                     }
 
                 }
-                else
-                {
-                    driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-                }
+              
 
             }
-            exit();
+            
         }
 
         public void exit()
@@ -98,7 +95,7 @@ namespace Selenium_g_y_proj
 
         public bool isSelectorExist(By selector)
         {
-            return driver.FindElements(By.CssSelector(".ads-ad")).Count == 0 ? false : true;
+            return driver.FindElements(selector).Count == 0 ? false : true;
         }
     }
 }

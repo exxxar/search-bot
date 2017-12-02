@@ -27,7 +27,7 @@ namespace Selenium_g_y_proj
         {
             driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
 
-            IWebElement text = driver.FindElement(By.Id("lst-ib"));
+            IWebElement text = driver.FindElement(By.Id("text"));
             Actions actions = new Actions(driver);
             actions.MoveToElement(text).Click().Perform();
 
@@ -44,25 +44,29 @@ namespace Selenium_g_y_proj
                 driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
                 System.Threading.Thread.Sleep(2000);
 
-                text = driver.FindElement(By.Id("lst-ib"));
+                text = driver.FindElement(By.Name("text"));
                 actions = new Actions(driver);
                 actions.MoveToElement(text).Click().Perform();
 
                 text.Clear();
                 text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
                 System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
-                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
 
-                if (isSelectorExist(By.CssSelector(".ads-ad")))
+                IWebElement button = driver.FindElement(By.ClassName("websearch-button__text"));
+                actions.MoveToElement(button).Click().Perform();
+              
+                if (isSelectorExist(By.CssSelector(".serp-adv-item")))
                 {//если реклама найдена
+                 
                     //выбираем все блоки, которые относятся к рекламе 
-                    foreach (IWebElement i in driver.FindElements(By.CssSelector(".ads-ad")))
+                    foreach (IWebElement i in driver.FindElements(By.CssSelector(".serp-adv-item")))
                     {
                         ++searchPos;
-                        String url = i.FindElement(By.CssSelector("._Jwu")).Text;
-                        String description = i.FindElement(By.CssSelector("._WGk")).Text;
+
+                        String url = i.FindElement(By.CssSelector(".link_outer_yes")).Text;
+                        String description = i.FindElement(By.CssSelector(".organic__title-wrapper")).Text;
                         //разбираем рекламное сообщение
-                        Console.WriteLine(url + " " + description);
+                        Console.WriteLine(url + "|" + description);
 
                         //формируем новую запись в бд
                         Keyword kw = new Keyword();
@@ -70,7 +74,7 @@ namespace Selenium_g_y_proj
                         kw.keyword_id = keyword_id;
                         kw.description = description;
                         kw.position[j] = (byte)searchPos;
-                        kw.browser = Keyword.Browser.GOOGLE;
+                        kw.browser = Keyword.Browser.YANDEX;
 
                         if (isExist(kw))
                             Update(kw);
@@ -80,13 +84,10 @@ namespace Selenium_g_y_proj
                     }
 
                 }
-                else
-                {
-                    driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-                }
+               
 
             }
-            exit();
+           
         }
 
         public void exit()
@@ -99,7 +100,7 @@ namespace Selenium_g_y_proj
 
         public bool isSelectorExist(By selector)
         {
-            throw new NotImplementedException();
+            return driver.FindElements(selector).Count == 0 ? false : true;
         }
     }
 }

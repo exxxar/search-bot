@@ -16,6 +16,7 @@ namespace Selenium_g_y_proj
        
         static void Main(string[] args)
         {
+
             try
             {
                 int offset = 0;
@@ -28,13 +29,12 @@ namespace Selenium_g_y_proj
                         Google google = new Google("https://google.com.ua");
                         //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                         google.search(k.keyword, k.keyword_id);
-                    }
+                        google.exit();
 
-                    foreach (DBKeyword k in db.list(offset, limit))
-                    {
                         Yandex yandex = new Yandex("https://yandex.ru");
                         //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                         yandex.search(k.keyword, k.keyword_id);
+                        yandex.exit();
                     }
                     
                      offset += 100;                   
@@ -42,10 +42,12 @@ namespace Selenium_g_y_proj
 
             }catch(Exception e)
             {
-                Console.WriteLine(e.Message);
+                Console.WriteLine(e.Message);               
             }
 
-            
+            //закрываем окно
+            Environment.Exit(0);
+
         }
     }
 }
