@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Selenium_g_y_proj.DBConection;
 
 namespace Selenium_g_y_proj
 {
@@ -17,9 +18,27 @@ namespace Selenium_g_y_proj
         {
             try
             {
-                Google chrome = new Google("https://google.com.ua");
-                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                chrome.search("грузчики",1);
+                int offset = 0;
+                int limit = 100;
+                DBConection db = new DBConection();
+                int count = db.count();
+                while (offset < count) {
+                    foreach (DBKeyword k in db.list(offset, limit))
+                    {
+                        Google google = new Google("https://google.com.ua");
+                        //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
+                        google.search(k.keyword, k.keyword_id);
+                    }
+
+                    foreach (DBKeyword k in db.list(offset, limit))
+                    {
+                        Yandex yandex = new Yandex("https://yandex.ru");
+                        //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
+                        yandex.search(k.keyword, k.keyword_id);
+                    }
+                    
+                     offset += 100;                   
+                }
 
             }catch(Exception e)
             {

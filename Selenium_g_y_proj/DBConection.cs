@@ -11,6 +11,10 @@ namespace Selenium_g_y_proj
     class DBConection
     {
 
+        public class DBKeyword {
+            public string keyword { get; set; }
+            public int keyword_id { get; set; }
+            }
         private MySqlConnection conn;
 
         private void Initialize()
@@ -44,5 +48,15 @@ namespace Selenium_g_y_proj
             //throw new Exception("testing update");
         }
 
+        public List<DBKeyword> list(int offset,int limit)
+        {
+            //выбирае из бд инфу с определенным смещением, чтоб не нагружать оперативку
+            return new List<DBKeyword>();
+        }
+
+        public int count()
+        {
+            return 0;
+        }
     }
 }

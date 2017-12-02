@@ -29,41 +29,60 @@ namespace Selenium_g_y_proj
 
             IWebElement text = driver.FindElement(By.Id("lst-ib"));
             Actions actions = new Actions(driver);
-            actions.MoveToElement(text).Click().Perform();  
-                
+            actions.MoveToElement(text).Click().Perform();
+
             text.SendKeys(keyword);//вводим искомое словосочетание
             System.Threading.Thread.Sleep(5000);//засыпаем, чтоб на нас не подумали что мы бот
             text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
             System.Threading.Thread.Sleep(5000);//засыпаем опять же, чтоб нас не раскрыли:D мы коварны     
-                                                
+
             //5раз обновляем страницу (пока так) чтоб выбрать разные варианты рекламы, в бд тоже нужно сделать структуру, которая бы сохраняла позицию выдачи рекламы в бд
             for (int j = 0; j < 5; j++)
             {
                 int searchPos = 0;
-                System.Threading.Thread.Sleep(2000);
+
                 driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-                //выбираем все блоки, которые относятся к рекламе 
-                foreach (IWebElement i in driver.FindElements(By.CssSelector(".ads-ad")))
+                System.Threading.Thread.Sleep(2000);
+
+                text = driver.FindElement(By.Id("lst-ib"));
+                actions = new Actions(driver);
+                actions.MoveToElement(text).Click().Perform();
+
+                text.Clear();
+                text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
+                System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
+                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
+
+                if (isSelectorExist(By.CssSelector(".ads-ad")))
+                {//если реклама найдена
+                    //выбираем все блоки, которые относятся к рекламе 
+                    foreach (IWebElement i in driver.FindElements(By.CssSelector(".ads-ad")))
+                    {
+                        ++searchPos;
+                        String url = i.FindElement(By.CssSelector("._Jwu")).Text;
+                        String description = i.FindElement(By.CssSelector("._WGk")).Text;
+                        //разбираем рекламное сообщение
+                        Console.WriteLine(url + " " + description);
+
+                        //формируем новую запись в бд
+                        Keyword kw = new Keyword();
+                        kw.url = url;
+                        kw.keyword_id = keyword_id;
+                        kw.description = description;
+                        kw.position[j] = (byte)searchPos;
+                        kw.browser = Keyword.Browser.GOOGLE;
+
+                        if (isExist(kw))
+                            Update(kw);
+                        else
+                            Insert(kw);
+
+                    }
+
+                }
+                else
                 {
-                    ++searchPos;
-                    String url = i.FindElement(By.CssSelector("._Jwu")).Text;
-                    String description = i.FindElement(By.CssSelector("._WGk")).Text;
-                    //разбираем рекламное сообщение
-                    Console.WriteLine(url+" "+ description);
-                    
-                    //формируем новую запись в бд
-                    Keyword kw = new Keyword();
-                    kw.url = url;
-                    kw.keyword_id = keyword_id;
-                    kw.description = description;
-                    kw.position[j] = (byte)searchPos;
-                    kw.browser = Keyword.Browser.GOOGLE;
-
-                    if (isExist(kw))
-                        Update(kw);
-                    else
-                        Insert(kw);
-
+                    driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
                 }
 
             }
@@ -78,6 +97,9 @@ namespace Selenium_g_y_proj
             //Environment.Exit(0);
         }
 
-      
+        public bool isSelectorExist(By selector)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

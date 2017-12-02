@@ -40,9 +40,19 @@ namespace Selenium_g_y_proj
             for (int j = 0; j < 5; j++)
             {
                 int searchPos = 0;
-                System.Threading.Thread.Sleep(2000);
+
                 driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-               
+                System.Threading.Thread.Sleep(2000);
+
+                text = driver.FindElement(By.Id("lst-ib"));
+                actions = new Actions(driver);
+                actions.MoveToElement(text).Click().Perform();
+
+                text.Clear();
+                text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
+                System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
+                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
+
                 if (isSelectorExist(By.CssSelector(".ads-ad"))) {//если реклама найдена
                     //выбираем все блоки, которые относятся к рекламе 
                     foreach (IWebElement i in driver.FindElements(By.CssSelector(".ads-ad")))
@@ -68,6 +78,10 @@ namespace Selenium_g_y_proj
 
                     }
 
+                }
+                else
+                {
+                    driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
                 }
 
             }
