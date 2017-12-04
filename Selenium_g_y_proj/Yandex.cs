@@ -86,7 +86,7 @@ namespace Selenium_g_y_proj
                         kw.keyword_id = keyword_id;
                         kw.description = description;
                         kw.position[j] = (byte)searchPos;
-                        kw.browser = Keyword.Browser.YANDEX;
+                        kw.browser = (byte)Keyword.Browser.YANDEX;
 
                         if (isExist(kw))
                             Update(kw);

@@ -19,7 +19,7 @@ namespace Selenium_g_y_proj
         public String url { get; set; }
         public String description { get; set; }
         public byte[] position { get; set; }
-        public Browser browser { get; set; }
+        public byte browser { get; set; }
 
         public Keyword()
         {
@@ -39,6 +39,11 @@ namespace Selenium_g_y_proj
                 buf.Append(pos + ";");
             }
             return buf.ToString();
+        }
+
+        public string toString()
+        {
+            return id + ";" + keyword_id + ";" + url + ";" + description + ";[" + getConcatPositions() + "];" + browser;
         }
 
     }

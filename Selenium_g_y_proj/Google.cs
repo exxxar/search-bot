@@ -81,7 +81,7 @@ namespace Selenium_g_y_proj
                         kw.keyword_id = keyword_id;
                         kw.description = description;
                         kw.position[j] = (byte)searchPos;
-                        kw.browser = Keyword.Browser.GOOGLE;
+                        kw.browser = (byte)Keyword.Browser.GOOGLE;
 
                         if (isExist(kw))
                             Update(kw);

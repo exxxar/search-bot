@@ -35,7 +35,8 @@ namespace Selenium_g_y_proj
 
         public Boolean isExist(Keyword keyword)
         {
-            string query = "SELECT Count(*) FROM `adpostions` WHERE `Keywords_id`="+keyword.keyword_id;
+            Console.WriteLine("Проверяем в бд " + keyword.toString());
+            string query = "SELECT Count(*) FROM `adpostions` WHERE `Keywords_id`="+keyword.keyword_id+ " and `browser`=" + keyword.browser+ " and `description`='"+keyword.description+"';";
             int Count = -1;
 
             //Open Connection
@@ -63,6 +64,7 @@ namespace Selenium_g_y_proj
         //Insert statement
         public void Insert(Keyword keyword)
         {
+            Console.WriteLine("Добавляем в бд " + keyword.toString());
             string query = "INSERT INTO `adpostions`(`url`, `description`, `positions`, `browser`, `Keywords_id`) VALUES ('"
                 +keyword.url+"','"
                 +keyword.description+"','"
@@ -85,15 +87,18 @@ namespace Selenium_g_y_proj
             
         }
 
+
         //Update statement
         public void Update(Keyword keyword)
         {
+
+            Console.WriteLine("Обновляем в бд " + keyword.toString());
             string query = "UPDATE `adpostions` SET `url`='"+keyword.url
                 + "',`description`='" + keyword.description
-                + "',`position`='"+keyword.getConcatPositions()
-                + "',`browser`="+keyword.browser
-                + ",`Keywords_id`="+keyword.keyword_id  
-                + "WHERE `id`="+keyword.id;
+                + "',`positions`='"+keyword.getConcatPositions()
+                + "',`browser`='"+keyword.browser
+                //+ ",`Keywords_id`="+keyword.keyword_id  
+                + "' WHERE `Keywords_id`=" + keyword.keyword_id +" and `description`= '"+keyword.description+"'; ";
 
 
             //Open connection
@@ -117,7 +122,7 @@ namespace Selenium_g_y_proj
         public List<DBKeyword> list(int offset,int limit)
         {
             //выбирае из бд инфу с определенным смещением, чтоб не нагружать оперативку
-            string query = "SELECT `keyword`, `keyword_id` FROM `keywords` LIMIT " + limit+" OFFSET "+offset+";";
+            string query = "SELECT `keyword`, `id` FROM `keywords` LIMIT " + limit+" OFFSET "+offset+";";
             List<DBKeyword> list_kw = new List<DBKeyword>();
             
             //Open connection
@@ -131,13 +136,11 @@ namespace Selenium_g_y_proj
                 //Read the data and store them in the list
                 while (dataReader.Read())
                 {
-
                     DBKeyword dbkw = new DBKeyword();
                     dbkw.keyword = "" + dataReader["keyword"];
-                    dbkw.keyword_id = Int32.Parse("" + dataReader["keyword_id"]);
+                    dbkw.keyword_id = Int32.Parse("" + dataReader["id"]);
 
-                    list_kw.Add(dbkw);
-                 
+                    list_kw.Add(dbkw);                 
                 }
 
                 //close Data Reader
