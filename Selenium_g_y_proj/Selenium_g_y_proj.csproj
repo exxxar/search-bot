@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IniFiles.cs" />
     <Compile Include="Yandex.cs" />
     <Compile Include="Google.cs" />
     <Compile Include="DBConection.cs" />

@@ -31,5 +31,15 @@ namespace Selenium_g_y_proj
             this.position = new byte[p_size>0?p_size:0];
         }
 
+        public string getConcatPositions()
+        {
+            StringBuilder buf = new StringBuilder();
+            foreach(int pos in this.position)
+            {
+                buf.Append(pos + ";");
+            }
+            return buf.ToString();
+        }
+
     }
 }

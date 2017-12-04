@@ -11,33 +11,45 @@ namespace Selenium_g_y_proj
 {
     class Yandex:DBConection,WebSite
     {
+        public const int MAX_REFRESHES = 1;//количество обновлений страницы для выборки
         public String url = "http://yandex.ru";
         public ChromeDriver driver;
+        public int mode = 0;
 
-        public Yandex(String url)
+        public Yandex(String url,int mode = 0) : base()
         {
+            this.mode = mode;
             this.url = url;
             driver = new ChromeDriver();//открываем сам браузер
             
             driver.Manage().Window.Maximize();//открываем браузер на полный экран
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(30); //время ожидания компонента страницы после загрузки страницы
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10); //время ожидания компонента страницы после загрузки страницы
+            if (this.mode == 1)
+            {
+                driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
+            }
         }
 
         public void search(String keyword,int keyword_id)
         {
-            driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
+      
+            IWebElement text = null;
+            Actions actions = null;
 
-            IWebElement text = driver.FindElement(By.Id("text"));
-            Actions actions = new Actions(driver);
-            actions.MoveToElement(text).Click().Perform();
+            if (this.mode == 0)
+            {
+                driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика   
+                text = driver.FindElement(By.Id("text"));
+                actions = new Actions(driver);
+                actions.MoveToElement(text).Click().Perform();
 
-            text.SendKeys(keyword);//вводим искомое словосочетание
-            System.Threading.Thread.Sleep(5000);//засыпаем, чтоб на нас не подумали что мы бот
-            text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
-            System.Threading.Thread.Sleep(5000);//засыпаем опять же, чтоб нас не раскрыли:D мы коварны     
-
+                text.SendKeys(keyword);//вводим искомое словосочетание
+                System.Threading.Thread.Sleep(5000);//засыпаем, чтоб на нас не подумали что мы бот
+                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
+                System.Threading.Thread.Sleep(5000);//засыпаем опять же, чтоб нас не раскрыли:D мы коварны     
+            }
             //5раз обновляем страницу (пока так) чтоб выбрать разные варианты рекламы, в бд тоже нужно сделать структуру, которая бы сохраняла позицию выдачи рекламы в бд
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < MAX_REFRESHES; j++)
             {
                 int searchPos = 0;
 
@@ -69,7 +81,7 @@ namespace Selenium_g_y_proj
                         Console.WriteLine(url + "|" + description);
 
                         //формируем новую запись в бд
-                        Keyword kw = new Keyword();
+                        Keyword kw = new Keyword(MAX_REFRESHES);
                         kw.url = url;
                         kw.keyword_id = keyword_id;
                         kw.description = description;
