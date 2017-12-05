@@ -12,7 +12,7 @@ namespace Selenium_g_y_proj
     class Google:DBConection,WebSite
     {
         public const int MAX_REFRESHES = 1;//количество обновлений страницы для выборки
-        public String url = "http://google.com.ua";
+        public String url = "http://google.ru";
         public ChromeDriver driver;
         public int mode = 0;
 
@@ -30,6 +30,35 @@ namespace Selenium_g_y_proj
             }
         }
 
+        public void open_settings()
+        {
+            IWebElement element = null;
+            Actions actions = null;
+
+            element = driver.FindElement(By.CssSelector("._Vbu"));
+
+            if (element.Text.ToUpper().Equals("РОССИЯ"))
+                return;
+
+            driver.Navigate().GoToUrl(this.url + "/preferences?hl=ru");
+
+            element = driver.FindElement(By.Id("regionanchormore"));
+            actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+
+
+            element = driver.FindElement(By.Id("regionoRU"));
+            actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+
+            
+            element = driver.FindElement(By.CssSelector(".jfk-button-action"));
+            actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+            driver.SwitchTo().Alert().Accept();
+            //driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
+
+        }
         public void search(String keyword,int keyword_id)
         {
             IWebElement text = null;

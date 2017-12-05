@@ -1,11 +1,15 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Selenium_g_y_proj.DBConection;
 
@@ -14,17 +18,19 @@ namespace Selenium_g_y_proj
     class Program
     {
 
+
         public const int STEP = 5;
         public const int MODE = 1;
+
         static void Main(string[] args)
         {
-            
+          
             int offset = 0;
             int limit = STEP;
 
             var MyIni = new IniFiles("Settings.ini");
 
-           
+            //StartProxyServer();
 
             try
             {
@@ -59,12 +65,15 @@ namespace Selenium_g_y_proj
                                     + k.keyword + "[" + k.keyword_id + "] offset="
                                     + offset + " limit=" + limit);
 
+                               
                                 Console.WriteLine("Обращаемся к гуглу");
-                                google = new Google("https://google.com.ua");
+                                google = new Google("http://google.ru");
+                                
                                 //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                                 google.search(k.keyword, k.keyword_id);
                                 google.exit();
 
+                             
                                 Console.WriteLine("Обращаемся к яндексу");
                                 yandex = new Yandex("https://yandex.ru");
                                 //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
@@ -92,24 +101,7 @@ namespace Selenium_g_y_proj
                         else
                             limit = Int32.Parse(MyIni.Read("limit_google"));
 
-                        google = new Google("https://google.com.ua",MODE);
-                        while (offset < count)
-                        {
-                            foreach (DBKeyword k in db.list(offset, limit))
-                            {
-                                Console.WriteLine("Выбираем словосочетание из БД="
-                                    + k.keyword + "[" + k.keyword_id + "] offset="
-                                    + offset + " limit=" + limit);
-
-                                Console.WriteLine("Обращаемся к гуглу");                            
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                google.search(k.keyword, k.keyword_id);
-                                                             
-                            }                           
-                            offset += STEP;
-                           MyIni.Write("offset_google", "" + offset);
-                        }
-                        google.exit();
+                    
 
                         if (!MyIni.KeyExists("offset_yandex"))
                         {
@@ -125,7 +117,9 @@ namespace Selenium_g_y_proj
                         else
                             limit = Int32.Parse(MyIni.Read("limit_yandex"));
 
+                      
                         yandex = new Yandex("https://yandex.ru", MODE);
+                        yandex.open_settings();
                         while (offset < count)
                         {
                             foreach (DBKeyword k in db.list(offset, limit))
@@ -144,6 +138,28 @@ namespace Selenium_g_y_proj
                             MyIni.Write("offset_yandex", "" + offset);
                         }
                         yandex.exit();
+
+
+                        google = new Google("http://google.ru", MODE);
+                        while (offset < count)
+                        {
+                            foreach (DBKeyword k in db.list(offset, limit))
+                            {
+                                Console.WriteLine("Выбираем словосочетание из БД="
+                                    + k.keyword + "[" + k.keyword_id + "] offset="
+                                    + offset + " limit=" + limit);
+
+                                Console.WriteLine("Обращаемся к гуглу");
+                                //открываем настройки и ставим регион 
+                                google.open_settings();
+                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
+                                google.search(k.keyword, k.keyword_id);
+
+                            }
+                            offset += STEP;
+                            MyIni.Write("offset_google", "" + offset);
+                        }
+                        google.exit();
                         break;
                 }
             }catch(Exception e)
@@ -155,5 +171,44 @@ namespace Selenium_g_y_proj
             Environment.Exit(0);
 
         }
+
+        public static void StartProxyServer()
+        {
+            StopProxyServer();
+
+            Process proxySrv = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = ConfigurationManager.AppSettings["TorProxySrvLocation"],
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    Arguments = " -f \"C:\\Users\\exxxa\\Desktop\\Tor Browser\\Browser\\TorBrowser\\Data\\Tor\\torrc\""
+                }
+            };
+
+            proxySrv.Start();
+       
+        } // StartProxyServer
+
+
+        // Останов работы прокси-сервера
+        public static void StopProxyServer()
+        {
+            try
+            {
+                // Находим запущенный процесс прокси-сервера
+                Process[] processes = Process.GetProcessesByName("tor");
+
+                // Если он запущен, перезапускаем его
+                if (processes.Length > 0) processes[0].Kill();
+            }catch(Exception e)
+            {
+
+            }
+            
+        } // StopProxyServer
+
+
     }
 }

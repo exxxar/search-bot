@@ -11,6 +11,7 @@ namespace Selenium_g_y_proj
     {
         void search(String keyword,int keyword_id);
         Boolean isSelectorExist(By selector);
+        void open_settings();
         void exit();
     }
 }

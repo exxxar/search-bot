@@ -30,13 +30,36 @@ namespace Selenium_g_y_proj
             }
         }
 
+        public void open_settings()
+        {
+            IWebElement element = null;
+            Actions actions = null;
+            
+            driver.Navigate().GoToUrl("https://yandex.ru/tune/geo/?retpath=https%3A%2F%2Fwww.yandex.ru%2F%3Fdomredir%3D1&nosync=1");
+            
+            element = driver.FindElement(By.Id("city__front-input"));
+            actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+            element.Clear();
+            element.SendKeys("Москва");
+            System.Threading.Thread.Sleep(2000);
+            element.SendKeys(Keys.Down);
+            System.Threading.Thread.Sleep(2000);
+            element.SendKeys(Keys.Enter);
+
+            element = driver.FindElement(By.CssSelector(".form__save"));
+            actions = new Actions(driver);
+            actions.MoveToElement(element).Click().Perform();
+
+        }
+
         public void search(String keyword,int keyword_id)
         {
       
             IWebElement text = null;
             Actions actions = null;
 
-            if (this.mode == 0)
+            if (driver.Url.IndexOf("search")==-1)
             {
                 driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика   
                 text = driver.FindElement(By.Id("text"));
@@ -53,20 +76,12 @@ namespace Selenium_g_y_proj
             {
                 int searchPos = 0;
 
-                driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-                System.Threading.Thread.Sleep(2000);
+               
 
-                text = driver.FindElement(By.Name("text"));
-                actions = new Actions(driver);
-                actions.MoveToElement(text).Click().Perform();
-
-                text.Clear();
-                text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
+                driver.Navigate().GoToUrl(this.url+ "/search/?text=" + keyword);//переходим по адресу поисковика
                 System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
 
-                IWebElement button = driver.FindElement(By.ClassName("websearch-button__text"));
-                actions.MoveToElement(button).Click().Perform();
-              
+
                 if (isSelectorExist(By.CssSelector(".serp-adv-item")))
                 {//если реклама найдена
                  
@@ -74,24 +89,35 @@ namespace Selenium_g_y_proj
                     foreach (IWebElement i in driver.FindElements(By.CssSelector(".serp-adv-item")))
                     {
                         ++searchPos;
+                        String url = "";
+                        String description = "";
+                        try
+                        {
+                            url =  i.FindElement(By.CssSelector(".link_outer_yes")).Text ;
+                            description = i.FindElement(By.CssSelector(".organic__title-wrapper")).Text ;
+                        }catch(Exception e)
+                        {
 
-                        String url = i.FindElement(By.CssSelector(".link_outer_yes")).Text;
-                        String description = i.FindElement(By.CssSelector(".organic__title-wrapper")).Text;
-                        //разбираем рекламное сообщение
-                        Console.WriteLine(url + "|" + description);
+                        }                            
 
-                        //формируем новую запись в бд
-                        Keyword kw = new Keyword(MAX_REFRESHES);
-                        kw.url = url;
-                        kw.keyword_id = keyword_id;
-                        kw.description = description;
-                        kw.position[j] = (byte)searchPos;
-                        kw.browser = (byte)Keyword.Browser.YANDEX;
+                        if (url.Trim() != "" || description.Trim() != "")
+                        {
+                            //разбираем рекламное сообщение
+                            Console.WriteLine(url + "|" + description);
 
-                        if (isExist(kw))
-                            Update(kw);
-                        else
-                            Insert(kw);
+                            //формируем новую запись в бд
+                            Keyword kw = new Keyword(MAX_REFRESHES);
+                            kw.url = url;
+                            kw.keyword_id = keyword_id;
+                            kw.description = description;
+                            kw.position[j] = (byte)searchPos;
+                            kw.browser = (byte)Keyword.Browser.YANDEX;
+
+                            if (isExist(kw))
+                                Update(kw);
+                            else
+                                Insert(kw);
+                        }
 
                     }
 
