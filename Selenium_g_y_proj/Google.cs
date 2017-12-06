@@ -45,13 +45,13 @@ namespace Selenium_g_y_proj
             element = driver.FindElement(By.Id("regionanchormore"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
-
+            System.Threading.Thread.Sleep(2000);//засыпаем, чтоб на нас не подумали что мы бот
 
             element = driver.FindElement(By.Id("regionoRU"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
+            System.Threading.Thread.Sleep(2000);//засыпаем, чтоб на нас не подумали что мы бот
 
-            
             element = driver.FindElement(By.CssSelector(".jfk-button-action"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();

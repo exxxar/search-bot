@@ -114,7 +114,7 @@ namespace Selenium_g_y_proj
                 + "\",`positions`='"+keyword.getConcatPositions()
                 + "',`browser`=\""+keyword.browser
                 //+ ",`Keywords_id`="+keyword.keyword_id  
-                + "\" WHERE `Keywords_id`=" + keyword.keyword_id +" and `description`= \""+keyword.description+"\"; ";
+                + "\" WHERE `Keywords_id`=" + keyword.keyword_id +" and `description`= \""+ rgx.Replace(keyword.description, replacement) + "\"; ";
 
           
 

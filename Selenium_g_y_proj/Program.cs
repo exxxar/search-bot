@@ -87,22 +87,6 @@ namespace Selenium_g_y_proj
                         break;
 
                     case 1:
-                        if (!MyIni.KeyExists("offset_google"))
-                        {
-                            MyIni.Write("offset_google", "0");
-                        }
-                        else
-                            offset = Int32.Parse(MyIni.Read("offset_google"));
-
-                        if (!MyIni.KeyExists("limit_google"))
-                        {
-                            MyIni.Write("limit_google", "" + STEP);
-                        }
-                        else
-                            limit = Int32.Parse(MyIni.Read("limit_google"));
-
-                    
-
                         if (!MyIni.KeyExists("offset_yandex"))
                         {
                             MyIni.Write("offset_yandex", "0");
@@ -117,7 +101,7 @@ namespace Selenium_g_y_proj
                         else
                             limit = Int32.Parse(MyIni.Read("limit_yandex"));
 
-                      
+
                         yandex = new Yandex("https://yandex.ru", MODE);
                         yandex.open_settings();
                         while (offset < count)
@@ -128,17 +112,31 @@ namespace Selenium_g_y_proj
                                     + k.keyword + "[" + k.keyword_id + "] offset="
                                     + offset + " limit=" + limit);
 
-                                Console.WriteLine("Обращаемся к яндексу");                               
+                                Console.WriteLine("Обращаемся к яндексу");
                                 //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                                 yandex.search(k.keyword, k.keyword_id);
-                                
+
                             }
-                           
+
                             offset += STEP;
                             MyIni.Write("offset_yandex", "" + offset);
                         }
                         yandex.exit();
 
+
+                        if (!MyIni.KeyExists("offset_google"))
+                        {
+                            MyIni.Write("offset_google", "0");
+                        }
+                        else
+                            offset = Int32.Parse(MyIni.Read("offset_google"));
+
+                        if (!MyIni.KeyExists("limit_google"))
+                        {
+                            MyIni.Write("limit_google", "" + STEP);
+                        }
+                        else
+                            limit = Int32.Parse(MyIni.Read("limit_google"));
 
                         google = new Google("http://google.ru", MODE);
                         while (offset < count)
@@ -160,6 +158,11 @@ namespace Selenium_g_y_proj
                             MyIni.Write("offset_google", "" + offset);
                         }
                         google.exit();
+
+
+                       
+
+                 
                         break;
                 }
             }catch(Exception e)
