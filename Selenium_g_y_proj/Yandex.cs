@@ -27,7 +27,7 @@ namespace Selenium_g_y_proj
             driver.LocationContext.PhysicalLocation = new OpenQA.Selenium.Html5.Location(55.751244, 37.618423,152);
 
             driver.Manage().Window.Maximize();//открываем браузер на полный экран
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(180); //время ожидания компонента страницы после загрузки страницы
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10); //время ожидания компонента страницы после загрузки страницы
             if (this.mode == 1)
             {
                 driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика

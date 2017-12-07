@@ -71,38 +71,38 @@ namespace Selenium_g_y_proj
                         break;
 
                     case 1:
-                        //if (!MyIni.KeyExists("offset_yandex"))
-                        //{
-                        //    MyIni.Write("offset_yandex", "0");
-                        //}
-                        //else
-                        //    offset = Int32.Parse(MyIni.Read("offset_yandex"));
+                        if (!MyIni.KeyExists("offset_yandex"))
+                        {
+                            MyIni.Write("offset_yandex", "0");
+                        }
+                        else
+                            offset = Int32.Parse(MyIni.Read("offset_yandex"));
 
-                        //if (!MyIni.KeyExists("limit_yandex"))
-                        //{
-                        //    MyIni.Write("limit_yandex", "" + STEP);
-                        //}
-                        //else
-                        //    limit = Int32.Parse(MyIni.Read("limit_yandex"));
+                        if (!MyIni.KeyExists("limit_yandex"))
+                        {
+                            MyIni.Write("limit_yandex", "" + STEP);
+                        }
+                        else
+                            limit = Int32.Parse(MyIni.Read("limit_yandex"));
 
-                        //yandex = new Yandex("https://yandex.ru", MODE);
-                        //yandex.open_settings();
-                        //while (offset < count)
-                        //{
-                        //    foreach (DBKeyword k in db.list(offset, limit))
-                        //    {
-                        //        Console.WriteLine("Выбираем словосочетание из БД="
-                        //            + k.keyword + "[" + k.keyword_id + "] offset="
-                        //            + offset + " limit=" + limit);
-                        //        Console.WriteLine("Обращаемся к яндексу");
-                        //        //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                        //        yandex.search(k.keyword, k.keyword_id);
-                        //    }
+                        yandex = new Yandex("https://yandex.ru", MODE);
+                        yandex.open_settings();
+                        while (offset < count)
+                        {
+                            foreach (DBKeyword k in db.list(offset, limit))
+                            {
+                                Console.WriteLine("Выбираем словосочетание из БД="
+                                    + k.keyword + "[" + k.keyword_id + "] offset="
+                                    + offset + " limit=" + limit);
+                                Console.WriteLine("Обращаемся к яндексу");
+                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
+                                yandex.search(k.keyword, k.keyword_id);
+                            }
 
-                        //    offset += STEP;
-                        //    MyIni.Write("offset_yandex", "" + offset);
-                        //}
-                        //yandex.exit();
+                            offset += STEP;
+                            MyIni.Write("offset_yandex", "" + offset);
+                        }
+                        yandex.exit();
 
 
                         if (!MyIni.KeyExists("offset_google"))
