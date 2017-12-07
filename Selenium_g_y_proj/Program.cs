@@ -1,23 +1,13 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Firefox;
-using OpenQA.Selenium.Interactions;
-using OpenQA.Selenium.Support.UI;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Configuration;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
 using static Selenium_g_y_proj.DBConection;
 
 namespace Selenium_g_y_proj
 {
     class Program
     {
-
 
         public const int STEP = 5;
         public const int MODE = 1;
@@ -34,7 +24,6 @@ namespace Selenium_g_y_proj
 
             try
             {
-
                 Google google = null;
                 Yandex yandex = null;
                 DBConection db = new DBConection();
@@ -64,64 +53,56 @@ namespace Selenium_g_y_proj
                                 Console.WriteLine("Выбираем словосочетание из БД="
                                     + k.keyword + "[" + k.keyword_id + "] offset="
                                     + offset + " limit=" + limit);
-
-                               
                                 Console.WriteLine("Обращаемся к гуглу");
                                 google = new Google("http://google.ru");
-                                
                                 //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                                 google.search(k.keyword, k.keyword_id);
                                 google.exit();
 
-                             
                                 Console.WriteLine("Обращаемся к яндексу");
                                 yandex = new Yandex("https://yandex.ru");
                                 //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
                                 yandex.search(k.keyword, k.keyword_id);
                                 yandex.exit();
                             }
-
                             offset += STEP;
                             MyIni.Write("offset", "" + offset);
                         }
                         break;
 
                     case 1:
-                        if (!MyIni.KeyExists("offset_yandex"))
-                        {
-                            MyIni.Write("offset_yandex", "0");
-                        }
-                        else
-                            offset = Int32.Parse(MyIni.Read("offset_yandex"));
+                        //if (!MyIni.KeyExists("offset_yandex"))
+                        //{
+                        //    MyIni.Write("offset_yandex", "0");
+                        //}
+                        //else
+                        //    offset = Int32.Parse(MyIni.Read("offset_yandex"));
 
-                        if (!MyIni.KeyExists("limit_yandex"))
-                        {
-                            MyIni.Write("limit_yandex", "" + STEP);
-                        }
-                        else
-                            limit = Int32.Parse(MyIni.Read("limit_yandex"));
+                        //if (!MyIni.KeyExists("limit_yandex"))
+                        //{
+                        //    MyIni.Write("limit_yandex", "" + STEP);
+                        //}
+                        //else
+                        //    limit = Int32.Parse(MyIni.Read("limit_yandex"));
 
+                        //yandex = new Yandex("https://yandex.ru", MODE);
+                        //yandex.open_settings();
+                        //while (offset < count)
+                        //{
+                        //    foreach (DBKeyword k in db.list(offset, limit))
+                        //    {
+                        //        Console.WriteLine("Выбираем словосочетание из БД="
+                        //            + k.keyword + "[" + k.keyword_id + "] offset="
+                        //            + offset + " limit=" + limit);
+                        //        Console.WriteLine("Обращаемся к яндексу");
+                        //        //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
+                        //        yandex.search(k.keyword, k.keyword_id);
+                        //    }
 
-                        yandex = new Yandex("https://yandex.ru", MODE);
-                        yandex.open_settings();
-                        while (offset < count)
-                        {
-                            foreach (DBKeyword k in db.list(offset, limit))
-                            {
-                                Console.WriteLine("Выбираем словосочетание из БД="
-                                    + k.keyword + "[" + k.keyword_id + "] offset="
-                                    + offset + " limit=" + limit);
-
-                                Console.WriteLine("Обращаемся к яндексу");
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                yandex.search(k.keyword, k.keyword_id);
-
-                            }
-
-                            offset += STEP;
-                            MyIni.Write("offset_yandex", "" + offset);
-                        }
-                        yandex.exit();
+                        //    offset += STEP;
+                        //    MyIni.Write("offset_yandex", "" + offset);
+                        //}
+                        //yandex.exit();
 
 
                         if (!MyIni.KeyExists("offset_google"))
@@ -158,11 +139,6 @@ namespace Selenium_g_y_proj
                             MyIni.Write("offset_google", "" + offset);
                         }
                         google.exit();
-
-
-                       
-
-                 
                         break;
                 }
             }catch(Exception e)
@@ -192,8 +168,7 @@ namespace Selenium_g_y_proj
 
             proxySrv.Start();
        
-        } // StartProxyServer
-
+        } 
 
         // Останов работы прокси-сервера
         public static void StopProxyServer()
@@ -205,13 +180,8 @@ namespace Selenium_g_y_proj
 
                 // Если он запущен, перезапускаем его
                 if (processes.Length > 0) processes[0].Kill();
-            }catch(Exception e)
-            {
-
-            }
-            
-        } // StopProxyServer
-
+            }catch(Exception e) {}            
+        } 
 
     }
 }

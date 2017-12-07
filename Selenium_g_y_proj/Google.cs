@@ -2,26 +2,28 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Selenium_g_y_proj
 {
-    class Google:DBConection,WebSite
+    class Google : Utils, WebSite
     {
         public const int MAX_REFRESHES = 1;//количество обновлений страницы для выборки
         public String url = "http://google.ru";
         public ChromeDriver driver;
         public int mode = 0;
 
-        public Google(String url,int mode=0) : base()
+        public Google(String url, int mode = 0) : base()
         {
             this.mode = mode;
             this.url = url;
-            driver = new ChromeDriver();//открываем сам браузер
-            
+
+            var options = new ChromeOptions();
+            options.AddArgument("no-sandbox");
+
+            driver = new ChromeDriver(options);//открываем сам браузер
+
+            driver.LocationContext.PhysicalLocation = new OpenQA.Selenium.Html5.Location(55.751244, 37.618423, 152);
+
             driver.Manage().Window.Maximize();//открываем браузер на полный экран
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10); //время ожидания компонента страницы после загрузки страницы
             if (this.mode == 1)
@@ -59,8 +61,12 @@ namespace Selenium_g_y_proj
             //driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
 
         }
-        public void search(String keyword,int keyword_id)
+        public void search(String keyword, int keyword_id)
         {
+
+           
+            VerifyPageIsLoaded(driver);
+
             IWebElement text = null;
             Actions actions = null;
 
@@ -93,37 +99,42 @@ namespace Selenium_g_y_proj
                 text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
                 System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
                 text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
+                 
 
-                if (isSelectorExist(By.CssSelector(".ads-ad"))) {//если реклама найдена
+                if (isSelectorExist(By.CssSelector(".ads-ad")))
+                {//если реклама найдена
                     //выбираем все блоки, которые относятся к рекламе 
                     foreach (IWebElement i in driver.FindElements(By.CssSelector(".ads-ad")))
                     {
+
                         ++searchPos;
-                        String url = i.FindElement(By.CssSelector("._Jwu")).Text;
-                        String description = i.FindElement(By.CssSelector("._WGk")).Text;
+                        String url = isSelectorExist(By.CssSelector("._Jwu")) ? i.FindElement(By.CssSelector("._Jwu")).Text : "";
+                        String description = isSelectorExist(By.CssSelector("._WGk")) ? i.FindElement(By.CssSelector("._WGk")).Text : "";
                         //разбираем рекламное сообщение
-                        Console.WriteLine(url + " " + description);
+                        if (url.Trim() != "" || description.Trim() != "")
+                        {
+                            Console.WriteLine(url + " " + description);
+                            //формируем новую запись в бд
+                            Keyword kw = new Keyword(MAX_REFRESHES);
+                            kw.url = url;
+                            kw.keyword_id = keyword_id;
+                            kw.description = description;
+                            kw.position[j] = (byte)searchPos;
+                            kw.browser = (byte)Keyword.Browser.GOOGLE;
 
-                        //формируем новую запись в бд
-                        Keyword kw = new Keyword(MAX_REFRESHES);
-                        kw.url = url;
-                        kw.keyword_id = keyword_id;
-                        kw.description = description;
-                        kw.position[j] = (byte)searchPos;
-                        kw.browser = (byte)Keyword.Browser.GOOGLE;
+                            if (isExist(kw))
+                                Update(kw);
+                            else
+                                Insert(kw);
 
-                        if (isExist(kw))
-                            Update(kw);
-                        else
-                            Insert(kw);
-
+                        }
                     }
 
                 }
-              
 
-            }
-            
+            }        
+
+
         }
 
         public void exit()
@@ -131,7 +142,6 @@ namespace Selenium_g_y_proj
             //закрываем драйвер и закрываем браузер
             driver.Close();
             driver.Quit();
-            //Environment.Exit(0);
         }
 
         public bool isSelectorExist(By selector)

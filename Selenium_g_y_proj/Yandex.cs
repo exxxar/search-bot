@@ -2,14 +2,12 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 
 namespace Selenium_g_y_proj
 {
-    class Yandex:DBConection,WebSite
+    class Yandex:Utils,WebSite
     {
         public const int MAX_REFRESHES = 1;//количество обновлений страницы для выборки
         public String url = "http://yandex.ru";
@@ -20,10 +18,16 @@ namespace Selenium_g_y_proj
         {
             this.mode = mode;
             this.url = url;
-            driver = new ChromeDriver();//открываем сам браузер
-            
+
+            var options = new ChromeOptions();
+            options.AddArgument("no-sandbox");
+
+            driver = new ChromeDriver(options);//открываем сам браузер
+
+            driver.LocationContext.PhysicalLocation = new OpenQA.Selenium.Html5.Location(55.751244, 37.618423,152);
+
             driver.Manage().Window.Maximize();//открываем браузер на полный экран
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10); //время ожидания компонента страницы после загрузки страницы
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(180); //время ожидания компонента страницы после загрузки страницы
             if (this.mode == 1)
             {
                 driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
@@ -36,7 +40,6 @@ namespace Selenium_g_y_proj
             Actions actions = null;
             
             driver.Navigate().GoToUrl("https://yandex.ru/tune/geo/?retpath=https%3A%2F%2Fwww.yandex.ru%2F%3Fdomredir%3D1&nosync=1");
-            
             element = driver.FindElement(By.Id("city__front-input"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
@@ -46,20 +49,21 @@ namespace Selenium_g_y_proj
             element.SendKeys(Keys.Down);
             System.Threading.Thread.Sleep(2000);
             element.SendKeys(Keys.Enter);
-
+            System.Threading.Thread.Sleep(2000);
             element = driver.FindElement(By.CssSelector(".form__save"));
-            actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
 
         }
 
         public void search(String keyword,int keyword_id)
         {
-      
+
+            VerifyPageIsLoaded(driver);
+
             IWebElement text = null;
             Actions actions = null;
 
-            if (driver.Url.IndexOf("search")==-1)
+            if (driver.Url.IndexOf("search") == -1)
             {
                 driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика   
                 text = driver.FindElement(By.Id("text"));
@@ -75,16 +79,12 @@ namespace Selenium_g_y_proj
             for (int j = 0; j < MAX_REFRESHES; j++)
             {
                 int searchPos = 0;
-
-               
-
-                driver.Navigate().GoToUrl(this.url+ "/search/?text=" + keyword);//переходим по адресу поисковика
+                driver.Navigate().GoToUrl(this.url + "/search/?text=" + keyword);//переходим по адресу поисковика
                 System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
 
-
                 if (isSelectorExist(By.CssSelector(".serp-adv-item")))
-                {//если реклама найдена
-                 
+                {
+                    //если реклама найдена           
                     //выбираем все блоки, которые относятся к рекламе 
                     foreach (IWebElement i in driver.FindElements(By.CssSelector(".serp-adv-item")))
                     {
@@ -93,12 +93,10 @@ namespace Selenium_g_y_proj
                         String description = "";
                         try
                         {
-                            url =  i.FindElement(By.CssSelector(".link_outer_yes")).Text ;
-                            description = i.FindElement(By.CssSelector(".organic__title-wrapper")).Text ;
-                        }catch(Exception e)
-                        {
-
-                        }                            
+                            url = i.FindElement(By.CssSelector(".link_outer_yes")).Text;
+                            description = i.FindElement(By.CssSelector(".organic__title-wrapper")).Text;
+                        }
+                        catch (Exception e) { }
 
                         if (url.Trim() != "" || description.Trim() != "")
                         {
@@ -118,14 +116,10 @@ namespace Selenium_g_y_proj
                             else
                                 Insert(kw);
                         }
-
                     }
-
                 }
-               
-
             }
-           
+          
         }
 
         public void exit()
@@ -133,12 +127,12 @@ namespace Selenium_g_y_proj
             //закрываем драйвер и закрываем браузер
             driver.Close();
             driver.Quit();
-            //Environment.Exit(0);
         }
 
         public bool isSelectorExist(By selector)
         {
             return driver.FindElements(selector).Count == 0 ? false : true;
         }
+
     }
 }
