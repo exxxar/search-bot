@@ -92,9 +92,6 @@ namespace Selenium_g_y_proj
 
             VerifyPageIsLoaded(driver);
 
-            IWebElement text = null;
-            Actions actions = null;
-
             driver.Navigate().GoToUrl(this.url + "/search/?text=" + keyword);
 
             System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
@@ -145,16 +142,16 @@ namespace Selenium_g_y_proj
 
                 int urlId = isUrlExist(localUrl);
                 if (urlId==-1)
-                   InsertUrl(localUrl);
+                   Insert_Site(localUrl);
 
                 //формируем новую запись в бд
                 Keyword kw = new Keyword();
                 //kw.url = url;
                 kw.keyword_id = keyword_id;
                 kw.description = description;
-                kw.isAd = isAd;
-                kw.regionId = this.regionId;
-                kw.urlId = urlId;
+                kw.is_ad = isAd;
+                kw.region_id = this.regionId;
+                kw.site_id = urlId;
                 if (isAd)
                     kw.position = (byte)(flagTB ? adTopCount : 4 + adBottomCount);
                 else
@@ -164,8 +161,8 @@ namespace Selenium_g_y_proj
                 kw.updated_at = DateTime.Now;
 
                 Console.WriteLine(kw.toString());             
-                if (!isExist(kw))
-                   Insert(kw);             
+                if (!isExist_AdSearchPosition(kw))
+                    Insert_AdSearchPosition(kw);             
 
             }
 

@@ -12,13 +12,11 @@ namespace Selenium_g_y_proj
     {
         
         public const int STEP = 5;
-        public const int MODE = 1;
+   
 
         static void Main(string[] args)
         {
-            YandexThreader yThread2 = new YandexThreader(1, 5, 0);
-
-            return;
+            
             int offset = 0;
             int limit = STEP;
             int threadsCount = 3;

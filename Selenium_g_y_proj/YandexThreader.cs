@@ -11,7 +11,7 @@ namespace Selenium_g_y_proj
     class YandexThreader
     {
         //private static Mutex mut = new Mutex();
-        public const int MODE = 1;
+        public const int MODE = 0;
         public const int STEP = 5;
 
         private Thread thread;

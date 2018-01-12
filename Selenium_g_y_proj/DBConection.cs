@@ -71,11 +71,11 @@ namespace Selenium_g_y_proj
                 Console.WriteLine("Добавляем в бд " + keyword.toString());
                 string query = "INSERT INTO `adsearchpostions` " +
                     "(`AdSearchPostions_site_id`, `description`, `positions`, `search_engine`, `Keywords_id`,`created_at`,`updated_at`,`is_ad`,`region_id`) VALUES " +
-                    "(@AdSearchPostions_site_id,\"@description\",@positions,@search_engine,@Keywords_id,\"@created_at\",\"@updated_at\",@is_ad,@region_id)";
+                    "(@AdSearchPostions_site_id,@description,@positions,@search_engine,@Keywords_id,@created_at,@updated_at,@is_ad,@region_id)";
 
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@AdSearchPostions", keyword.site_id);
+                cmd.Parameters.AddWithValue("@AdSearchPostions_site_id", keyword.site_id);
                 cmd.Parameters.AddWithValue("@description", rgx.Replace(keyword.description, replacement));
                 cmd.Parameters.AddWithValue("@positions", keyword.position);
                 cmd.Parameters.AddWithValue("@search_engine", keyword.search_engine);
@@ -105,7 +105,7 @@ namespace Selenium_g_y_proj
             try
             {
 
-                string query = "SELECT * FROM `site` WHERE `site`=\"@site_url\";";
+                string query = "SELECT * FROM `site` WHERE `site`=@site_url;";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@site_url", site_url);
@@ -113,7 +113,7 @@ namespace Selenium_g_y_proj
 
                 while (dataReader.Read())
                 {
-                    site_id = dataReader.GetInt32("id");
+                    site_id = dataReader.GetInt32("site_id");
                 }
 
                 dataReader.Close();
@@ -138,7 +138,7 @@ namespace Selenium_g_y_proj
             //create command and assign the query and connection from the constructor
             try
             {
-                string query = "INSERT INTO `site` (`site`) VALUES (\"@site_url\");";
+                string query = "INSERT INTO `site` (`site`) VALUES ( @site_url );";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@site_url", site_url);
                 cmd.ExecuteNonQuery();
@@ -159,7 +159,7 @@ namespace Selenium_g_y_proj
             //create command and assign the query and connection from the constructor
             try
             {
-                string query = "INSERT INTO `uri` (`uri`,`site_id`) VALUES (\"@uri\",@site_id);";
+                string query = "INSERT INTO `uri` (`uri`,`site_id`) VALUES (@uri,@site_id);";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@uri", site_uri);
                 cmd.Parameters.AddWithValue("@site_id", site_uri);
@@ -184,7 +184,7 @@ namespace Selenium_g_y_proj
             try
             {
                 //Create Command
-                string query = "SELECT uri_id FROM `uri` WHERE `uri`=\"@uril\"";
+                string query = "SELECT uri_id FROM `uri` WHERE `uri`=@uri";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@uri", uri);
 
@@ -193,7 +193,7 @@ namespace Selenium_g_y_proj
 
                 while (dataReader.Read())
                 {
-                    uri_id = dataReader.GetInt32("id");
+                    uri_id = dataReader.GetInt32("uri_id");
                 }
                 dataReader.Close();
 
@@ -219,7 +219,7 @@ namespace Selenium_g_y_proj
             try
             {
                 //Create Command
-                string query = "SELECT site_id FROM `site` WHERE `site`=\"@site_url\"";
+                string query = "SELECT site_id FROM `site` WHERE `site`=@site_url";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@site_url", site_url);
 

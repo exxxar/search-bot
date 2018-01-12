@@ -58,7 +58,8 @@
   <ItemGroup>
     <Compile Include="GoogleThreader.cs" />
     <Compile Include="IniFiles.cs" />
-    <Compile Include="Url.cs" />
+    <Compile Include="Site.cs" />
+    <Compile Include="Uri.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="Yandex.cs" />
     <Compile Include="Google.cs" />
