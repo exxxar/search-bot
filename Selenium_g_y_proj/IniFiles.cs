@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,9 +29,10 @@ namespace Selenium_g_y_proj
             return RetVal.ToString();
         }
 
-        public void Write(string Key, string Value, string Section = null)
+        public String Write(string Key, string Value, string Section = null)
         {
             WritePrivateProfileString(Section ?? EXE, Key, Value, Path);
+            return Value;
         }
 
         public void DeleteKey(string Key, string Section = null)

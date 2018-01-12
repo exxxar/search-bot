@@ -18,7 +18,13 @@ namespace Selenium_g_y_proj
             this.url = url;
 
             var options = new ChromeOptions();
-            options.AddArgument("no-sandbox");
+            //options.AddArgument("no-sandbox");
+            options.AddArguments("--disable-extensions");
+           // options.AddArgument("no-sandbox");
+            //options.AddArgument("--incognito");
+            options.AddArgument("--headless");
+            options.AddArgument("--disable-gpu");  //--disable-media-session-api
+                                                   //options.AddArgument("--remote-debugging-port=9222");
 
             driver = new ChromeDriver(options);//открываем сам браузер
 
@@ -44,11 +50,20 @@ namespace Selenium_g_y_proj
 
             driver.Navigate().GoToUrl(this.url + "/preferences?hl=ru");
 
+            System.Threading.Thread.Sleep(2000);
+
+            element = driver.FindElement(By.CssSelector(".goog-slider-thumb"));
+            actions = new Actions(driver);
+            actions.DragAndDropToOffset(element,100,0).Perform();     
+
+            System.Threading.Thread.Sleep(5000);
+
             element = driver.FindElement(By.Id("regionanchormore"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
             System.Threading.Thread.Sleep(2000);//засыпаем, чтоб на нас не подумали что мы бот
-
+            
+            
             element = driver.FindElement(By.Id("regionoRU"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
@@ -57,49 +72,20 @@ namespace Selenium_g_y_proj
             element = driver.FindElement(By.CssSelector(".jfk-button-action"));
             actions = new Actions(driver);
             actions.MoveToElement(element).Click().Perform();
+            System.Threading.Thread.Sleep(2000);
             driver.SwitchTo().Alert().Accept();
             //driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
-
+            System.Threading.Thread.Sleep(4000);
         }
         public void search(String keyword, int keyword_id)
-        {
+        {           
+            VerifyPageIsLoaded(driver);             
 
-           
-            VerifyPageIsLoaded(driver);
-
-            IWebElement text = null;
-            Actions actions = null;
-
-            if (this.mode == 0)
-            {
-                driver.Navigate().GoToUrl(this.url);//переходим по адресу поисковика
-
-                text = driver.FindElement(By.Id("lst-ib"));
-                actions = new Actions(driver);
-                actions.MoveToElement(text).Click().Perform();
-
-                text.SendKeys(keyword);//вводим искомое словосочетание
-                System.Threading.Thread.Sleep(5000);//засыпаем, чтоб на нас не подумали что мы бот
-                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
-                System.Threading.Thread.Sleep(5000);//засыпаем опять же, чтоб нас не раскрыли:D мы коварны     
-            }
-            //5раз обновляем страницу (пока так) чтоб выбрать разные варианты рекламы, в бд тоже нужно сделать структуру, которая бы сохраняла позицию выдачи рекламы в бд
             for (int j = 0; j < MAX_REFRESHES; j++)
             {
-                int searchPos = 0;
+                int searchPos = 0;              
 
-                driver.Navigate().Refresh();//обновление страницы, чтоб выбрать больше вариантов рекламы
-                System.Threading.Thread.Sleep(2000);
-
-                text = driver.FindElement(By.Id("lst-ib"));
-                actions = new Actions(driver);
-                actions.MoveToElement(text).Click().Perform();
-
-                text.Clear();
-                text.SendKeys(keyword);//вводим искомое словосочетание на всякий случай повторно
-                System.Threading.Thread.Sleep(1000);//засыпаем, чтоб на нас не подумали что мы бот
-                text.SendKeys(Keys.Enter);//жмем Enter для  отправки поискового запроса
-                 
+                driver.Navigate().GoToUrl("https://www.google.com.ua/search?source=hp&q=" + keyword);
 
                 if (isSelectorExist(By.CssSelector(".ads-ad")))
                 {//если реклама найдена
@@ -115,17 +101,17 @@ namespace Selenium_g_y_proj
                         {
                             Console.WriteLine(url + " " + description);
                             //формируем новую запись в бд
-                            Keyword kw = new Keyword(MAX_REFRESHES);
-                            kw.url = url;
+                            Keyword kw = new Keyword();
+                            //kw.url = url;
                             kw.keyword_id = keyword_id;
                             kw.description = description;
-                            kw.position[j] = (byte)searchPos;
-                            kw.browser = (byte)Keyword.Browser.GOOGLE;
+                            kw.position = (byte)searchPos;
+                            kw.search_engine = (byte)Keyword.SearchEngine.GOOGLE;
 
-                            if (isExist(kw))
-                                Update(kw);
-                            else
-                                Insert(kw);
+                            //if (isExist(kw))
+                            //    Update(kw);
+                            //else
+                            //    Insert(kw);
 
                         }
                     }

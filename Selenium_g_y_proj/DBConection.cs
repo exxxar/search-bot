@@ -8,11 +8,11 @@ namespace Selenium_g_y_proj
 {
     class DBConection
     {
-
-        public class DBKeyword {
+        public class DBKeyword
+        {
             public string keyword { get; set; }
             public int keyword_id { get; set; }
-            }
+        }
         private MySqlConnection conn;
 
         public DBConection()
@@ -25,176 +25,268 @@ namespace Selenium_g_y_proj
             string connStr = ConfigurationManager
                 .ConnectionStrings["keywordsConnStr"]
                 .ConnectionString;
-
             conn = new MySqlConnection(connStr);
-          
         }
-       
 
-        public Boolean isExist(Keyword keyword)
+
+        public Boolean isExist_AdSearchPosition(Keyword keyword)
         {
-            string replacement = "";
-            Regex rgx = new Regex("['\"]");
+            if (!this.OpenConnection())
+                return false;
 
             Console.WriteLine("Проверяем в бд " + keyword.toString());
-            string query = "SELECT Count(*) FROM `adpostions` WHERE `Keywords_id`="
-                +keyword.keyword_id+ " and `browser`=" 
-                +keyword.browser+ " and `description`=\""
-                +rgx.Replace(keyword.description, replacement)+"\";";
+
             int Count = -1;
 
-            //Open Connection
-            if (this.OpenConnection() == true)
+            try
             {
-                //Create Mysql Command
-                MySqlCommand cmd = new MySqlCommand(query, conn);
+                string query = "SELECT Count(*) FROM `adsearchpostions` WHERE `Keywords_id`=@Keywords_id and `search_engine`=@search_engine and `positions`=@positions";
 
-                //ExecuteScalar will return one value
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Keywords_id", keyword.keyword_id);
+                cmd.Parameters.AddWithValue("@search_engine", keyword.search_engine);
+                cmd.Parameters.AddWithValue("@positions", keyword.position);
+
                 Count = int.Parse(cmd.ExecuteScalar() + "");
-
-                //close Connection
-                this.CloseConnection();
-                if (Count > 0)
-                    return true;
-                else
-                    return false;
             }
-            else
+            catch (Exception e)
             {
-                return false;
+                Console.WriteLine(e);
             }
-
+            this.CloseConnection();
+            return Count > 0;
         }
-        //Insert statement
-        public void Insert(Keyword keyword)
+
+        public void Insert_AdSearchPosition(Keyword keyword)
         {
 
-            string replacement = "";
-            Regex rgx = new Regex("['\"]");
+            if (!this.OpenConnection())
+                return;
 
-            Console.WriteLine("Добавляем в бд " + keyword.toString());
-            string query = "INSERT INTO `adpostions`(`url`, `description`, `positions`, `browser`, `Keywords_id`) VALUES (\""
-                + rgx.Replace(keyword.url, replacement) + "\",\""
-                + rgx.Replace(keyword.description, replacement) + "\",\""
-                +keyword.getConcatPositions()+"\","
-                +keyword.browser+","
-                +keyword.keyword_id+")";
-
-            //open connection
-            if (this.OpenConnection() == true)
+            try
             {
-                //create command and assign the query and connection from the constructor
+                string replacement = "";
+                Regex rgx = new Regex("['\"]");
+
+                Console.WriteLine("Добавляем в бд " + keyword.toString());
+                string query = "INSERT INTO `adsearchpostions` " +
+                    "(`AdSearchPostions_site_id`, `description`, `positions`, `search_engine`, `Keywords_id`,`created_at`,`updated_at`,`is_ad`,`region_id`) VALUES " +
+                    "(@AdSearchPostions_site_id,\"@description\",@positions,@search_engine,@Keywords_id,\"@created_at\",\"@updated_at\",@is_ad,@region_id)";
+
+
                 MySqlCommand cmd = new MySqlCommand(query, conn);
-
-                //Execute command
+                cmd.Parameters.AddWithValue("@AdSearchPostions", keyword.site_id);
+                cmd.Parameters.AddWithValue("@description", rgx.Replace(keyword.description, replacement));
+                cmd.Parameters.AddWithValue("@positions", keyword.position);
+                cmd.Parameters.AddWithValue("@search_engine", keyword.search_engine);
+                cmd.Parameters.AddWithValue("@Keywords_id", keyword.keyword_id);
+                cmd.Parameters.AddWithValue("@created_at", keyword.created_at);
+                cmd.Parameters.AddWithValue("@updated_at", keyword.updated_at);
+                cmd.Parameters.AddWithValue("@is_ad", keyword.is_ad);
+                cmd.Parameters.AddWithValue("@region_id", keyword.region_id);
                 cmd.ExecuteNonQuery();
-
-                //close connection
-                this.CloseConnection();
             }
-            
-        }
-
-
-
-        //Update statement
-        public void Update(Keyword keyword)
-        {
-
-            Console.WriteLine("Обновляем в бд " + keyword.toString());
-
-            string replacement = "";
-            Regex rgx = new Regex("['\"]");
-
-            string query = "UPDATE `adpostions` SET `url`=\""+ rgx.Replace(keyword.url, replacement)
-                + "\",`description`=\"" + rgx.Replace(keyword.description, replacement)
-                + "\",`positions`='"+keyword.getConcatPositions()
-                + "',`browser`=\""+keyword.browser
-                //+ ",`Keywords_id`="+keyword.keyword_id  
-                + "\" WHERE `Keywords_id`=" + keyword.keyword_id +" and `description`= \""+ rgx.Replace(keyword.description, replacement) + "\"; ";
-
-          
-
-            //Open connection
-            if (this.OpenConnection() == true)
+            catch (Exception e)
             {
-                //create mysql command
-                MySqlCommand cmd = new MySqlCommand();
-                //Assign the query using CommandText
-                cmd.CommandText = query;
-                //Assign the connection using Connection
-                cmd.Connection = conn;
-
-                //Execute query
-                cmd.ExecuteNonQuery();
-
-                //close connection
-                this.CloseConnection();
+                Console.WriteLine(e);
             }
+            this.CloseConnection();
         }
 
-        public List<DBKeyword> list(int offset,int limit)
+
+
+        public int isUrlExist(String site_url)
         {
-            //выбирае из бд инфу с определенным смещением, чтоб не нагружать оперативку
-            string query = "SELECT `keyword`, `id` FROM `keywords` LIMIT " + limit+" OFFSET "+offset+";";
-            List<DBKeyword> list_kw = new List<DBKeyword>();
-            
-            //Open connection
-            if (this.OpenConnection() == true)
+            if (!this.OpenConnection())
+                return -1;
+
+            int site_id = -1;
+
+            try
+            {
+
+                string query = "SELECT * FROM `site` WHERE `site`=\"@site_url\";";
+
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@site_url", site_url);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    site_id = dataReader.GetInt32("id");
+                }
+
+                dataReader.Close();
+                this.CloseConnection();
+                return site_id;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return site_id;
+        }
+
+        public void Insert_Site(String site_url)
+        {
+            if (!this.OpenConnection())
+                return;
+
+            Console.WriteLine("Добавляем URL в бд " + site_url);
+
+            //create command and assign the query and connection from the constructor
+            try
+            {
+                string query = "INSERT INTO `site` (`site`) VALUES (\"@site_url\");";
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@site_url", site_url);
+                cmd.ExecuteNonQuery();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            this.CloseConnection();
+        }
+
+        public void Insert_Uri(String site_uri)
+        {
+            if (!this.OpenConnection())
+                return;
+
+            //create command and assign the query and connection from the constructor
+            try
+            {
+                string query = "INSERT INTO `uri` (`uri`,`site_id`) VALUES (\"@uri\",@site_id);";
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@uri", site_uri);
+                cmd.Parameters.AddWithValue("@site_id", site_uri);
+                cmd.ExecuteNonQuery();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            this.CloseConnection();
+        }
+
+        public int Select_Uri_id(String uri)
+        {
+
+            if (!this.OpenConnection())
+                return -1;
+
+            int uri_id = -1;
+
+            try
             {
                 //Create Command
+                string query = "SELECT uri_id FROM `uri` WHERE `uri`=\"@uril\"";
                 MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@uri", uri);
+
                 //Create a data reader and Execute the command
                 MySqlDataReader dataReader = cmd.ExecuteReader();
 
-                //Read the data and store them in the list
                 while (dataReader.Read())
                 {
-                    DBKeyword dbkw = new DBKeyword();
-                    dbkw.keyword = "" + dataReader["keyword"];
-                    dbkw.keyword_id = Int32.Parse("" + dataReader["id"]);
-
-                    list_kw.Add(dbkw);                 
+                    uri_id = dataReader.GetInt32("id");
                 }
-
-                //close Data Reader
                 dataReader.Close();
 
-                //close Connection
-                this.CloseConnection();
-
-                //return list to be displayed
-                return list_kw;
             }
-            else
+            catch (Exception e)
             {
-                return list_kw;
+                Console.WriteLine(e);
             }
+            this.CloseConnection();
+
+            return uri_id;
+        }
+
+
+        public int Select_Site_id(String site_url)
+        {
+
+            if (!this.OpenConnection())
+                return -1;
+
+            int site_id = -1;
+
+            try
+            {
+                //Create Command
+                string query = "SELECT site_id FROM `site` WHERE `site`=\"@site_url\"";
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@site_url", site_url);
+
+                //Create a data reader and Execute the command
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    site_id = dataReader.GetInt32("id");
+                }
+                dataReader.Close();
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            this.CloseConnection();
+
+            return site_id;
+        }
+
+
+        public List<DBKeyword> list(int offset, int limit)
+        {
+            if (!this.OpenConnection())
+                return new List<DBKeyword>();
+
+            //выбирае из бд инфу с определенным смещением, чтоб не нагружать оперативку
+            string query = "SELECT `keyword`, `id` FROM `keywords` LIMIT @limit OFFSET @offset;";
+            List<DBKeyword> list_kw = new List<DBKeyword>();
+
+            //Create Command
+            MySqlCommand cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@limit", limit);
+            cmd.Parameters.AddWithValue("@offset", offset);
+            //Create a data reader and Execute the command
+            MySqlDataReader dataReader = cmd.ExecuteReader();
+
+            //Read the data and store them in the list
+            while (dataReader.Read())
+            {
+                DBKeyword dbkw = new DBKeyword();
+                dbkw.keyword = "" + dataReader["keyword"];
+                dbkw.keyword_id = Int32.Parse("" + dataReader["id"]);
+                list_kw.Add(dbkw);
+            }
+
+            dataReader.Close();
+            this.CloseConnection();
+
+            return list_kw;
         }
 
         public int count()
         {
+            if (!this.OpenConnection())
+                return -1;
+
             string query = "SELECT Count(*) FROM `keywords`";
             int Count = -1;
 
-            //Open Connection
-            if (this.OpenConnection() == true)
-            {
-                //Create Mysql Command
-                MySqlCommand cmd = new MySqlCommand(query, conn);
+            MySqlCommand cmd = new MySqlCommand(query, conn);
+            Count = int.Parse(cmd.ExecuteScalar() + "");
+            this.CloseConnection();
 
-                //ExecuteScalar will return one value
-                Count = int.Parse(cmd.ExecuteScalar() + "");
-
-                //close Connection
-                this.CloseConnection();
-
-                return Count;
-            }
-            else
-            {
-                return Count;
-            }
+            return Count;
 
         }
 
@@ -222,7 +314,7 @@ namespace Selenium_g_y_proj
             }
             catch (MySqlException ex)
             {
-                
+
                 switch (ex.Number)
                 {
                     case 0:

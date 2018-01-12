@@ -1,155 +1,74 @@
-﻿using System;
+﻿using OpenQA.Selenium.Chrome;
+using System;
+
 using System.Configuration;
 using System.Diagnostics;
 
-using static Selenium_g_y_proj.DBConection;
+
 
 namespace Selenium_g_y_proj
 {
     class Program
     {
-
+        
         public const int STEP = 5;
         public const int MODE = 1;
 
         static void Main(string[] args)
         {
-          
+            YandexThreader yThread2 = new YandexThreader(1, 5, 0);
+
+            return;
             int offset = 0;
             int limit = STEP;
+            int threadsCount = 3;
+
+            DBConection db = new DBConection();
+            int count = db.count();
+            int offsetStepByThread = (int)(count / threadsCount);
 
             var MyIni = new IniFiles("Settings.ini");
 
-            //StartProxyServer();
+            threadsCount = !MyIni.KeyExists("thread_count") ?
+                  Int32.Parse(MyIni.Write("thread_count", "" + threadsCount)):
+                  Int32.Parse(MyIni.Read("thread_count"));
 
-            try
+            Console.WriteLine("Потоков: {0} , смещение в бд для 1 потока {1}", threadsCount, offsetStepByThread);
+            Console.ReadKey();
+            for (int i = 0; i < threadsCount; i++)
             {
-                Google google = null;
-                Yandex yandex = null;
-                DBConection db = new DBConection();
-                int count = db.count();
-                switch (MODE)
-                {
-                    default:
-                    case 0:
-                        if (!MyIni.KeyExists("offset"))
-                        {
-                            MyIni.Write("offset", "0");
-                        }
-                        else
-                            offset = Int32.Parse(MyIni.Read("offset"));
+                offset = !MyIni.KeyExists("offset_yandex_"+i) ?
+                 Int32.Parse(MyIni.Write("offset_yandex_"+i, "" + (offsetStepByThread * i))) :
+                  Int32.Parse(MyIni.Read("offset_yandex_"+i));
 
-                        if (!MyIni.KeyExists("limit"))
-                        {
-                            MyIni.Write("limit", "" + STEP);
-                        }
-                        else
-                            limit = Int32.Parse(MyIni.Read("limit"));
+                limit = !MyIni.KeyExists("limit_yandex_"+i) ? 
+                   Int32.Parse(MyIni.Write("limit_yandex_"+i, "" + STEP)) :
+                   Int32.Parse(MyIni.Read("limit_yandex_"+i));
 
-                        while (offset < count)
-                        {
-                            foreach (DBKeyword k in db.list(offset, limit))
-                            {
-                                Console.WriteLine("Выбираем словосочетание из БД="
-                                    + k.keyword + "[" + k.keyword_id + "] offset="
-                                    + offset + " limit=" + limit);
-                                Console.WriteLine("Обращаемся к гуглу");
-                                google = new Google("http://google.ru");
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                google.search(k.keyword, k.keyword_id);
-                                google.exit();
+                Console.WriteLine("id={0}  limit=>{1} offset=>{2}",i,limit,offset);
+ 
+                YandexThreader yThread = new YandexThreader(i, limit, offset);
 
-                                Console.WriteLine("Обращаемся к яндексу");
-                                yandex = new Yandex("https://yandex.ru");
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                yandex.search(k.keyword, k.keyword_id);
-                                yandex.exit();
-                            }
-                            offset += STEP;
-                            MyIni.Write("offset", "" + offset);
-                        }
-                        break;
+                //offset = !MyIni.KeyExists("offset_google_" + i) ?
+                // Int32.Parse(MyIni.Write("offset_google_" + i, "" + (threadsCount * i))) :
+                //  Int32.Parse(MyIni.Read("offset_google_" + i));
 
-                    case 1:
-                        if (!MyIni.KeyExists("offset_yandex"))
-                        {
-                            MyIni.Write("offset_yandex", "0");
-                        }
-                        else
-                            offset = Int32.Parse(MyIni.Read("offset_yandex"));
-
-                        if (!MyIni.KeyExists("limit_yandex"))
-                        {
-                            MyIni.Write("limit_yandex", "" + STEP);
-                        }
-                        else
-                            limit = Int32.Parse(MyIni.Read("limit_yandex"));
-
-                        yandex = new Yandex("https://yandex.ru", MODE);
-                        yandex.open_settings();
-                        while (offset < count)
-                        {
-                            foreach (DBKeyword k in db.list(offset, limit))
-                            {
-                                Console.WriteLine("Выбираем словосочетание из БД="
-                                    + k.keyword + "[" + k.keyword_id + "] offset="
-                                    + offset + " limit=" + limit);
-                                Console.WriteLine("Обращаемся к яндексу");
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                yandex.search(k.keyword, k.keyword_id);
-                            }
-
-                            offset += STEP;
-                            MyIni.Write("offset_yandex", "" + offset);
-                        }
-                        yandex.exit();
+                //limit = !MyIni.KeyExists("limit_google_" + i) ?
+                //   Int32.Parse(MyIni.Write("limit_google_" + i, "" + STEP)) :
+                //   Int32.Parse(MyIni.Read("limit_google_" + i));
 
 
-                        if (!MyIni.KeyExists("offset_google"))
-                        {
-                            MyIni.Write("offset_google", "0");
-                        }
-                        else
-                            offset = Int32.Parse(MyIni.Read("offset_google"));
+                //GoogleThreader gThread = new GoogleThreader(i, limit, offset);
+                //Console.WriteLine("test limit=>{0} offset=>{1}", limit, offset);
 
-                        if (!MyIni.KeyExists("limit_google"))
-                        {
-                            MyIni.Write("limit_google", "" + STEP);
-                        }
-                        else
-                            limit = Int32.Parse(MyIni.Read("limit_google"));
-
-                        google = new Google("http://google.ru", MODE);
-                        while (offset < count)
-                        {
-                            foreach (DBKeyword k in db.list(offset, limit))
-                            {
-                                Console.WriteLine("Выбираем словосочетание из БД="
-                                    + k.keyword + "[" + k.keyword_id + "] offset="
-                                    + offset + " limit=" + limit);
-
-                                Console.WriteLine("Обращаемся к гуглу");
-                                //открываем настройки и ставим регион 
-                                google.open_settings();
-                                //тут выбираем из базы слова и в цикле по очереди вызываем метод поиска
-                                google.search(k.keyword, k.keyword_id);
-
-                            }
-                            offset += STEP;
-                            MyIni.Write("offset_google", "" + offset);
-                        }
-                        google.exit();
-                        break;
-                }
-            }catch(Exception e)
-            {
-                Console.WriteLine(e.Message);               
             }
 
+            Console.ReadKey();
             //закрываем окно
             Environment.Exit(0);
-
         }
+
+      
 
         public static void StartProxyServer()
         {
@@ -182,6 +101,7 @@ namespace Selenium_g_y_proj
                 if (processes.Length > 0) processes[0].Kill();
             }catch(Exception e) {}            
         } 
+
 
     }
 }
