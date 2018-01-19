@@ -142,8 +142,10 @@ namespace Selenium_g_y_proj
 
                 int urlId = isUrlExist(localUrl);
                 if (urlId==-1)
-                   Insert_Site(localUrl);
+                     Insert_Site(localUrl);
 
+                urlId = Select_Site_id(localUrl);
+                Console.WriteLine("!!!SITE_ID=>" + urlId);
                 //формируем новую запись в бд
                 Keyword kw = new Keyword();
                 //kw.url = url;
@@ -160,9 +162,17 @@ namespace Selenium_g_y_proj
                 kw.created_at = DateTime.Now;
                 kw.updated_at = DateTime.Now;
 
-                Console.WriteLine(kw.toString());             
-                if (!isExist_AdSearchPosition(kw))
-                    Insert_AdSearchPosition(kw);             
+                Console.WriteLine("Формируем блок для записи=>"+kw.toString());
+                try
+                {
+                    if (!isExist_AdSearchPosition(kw))
+                        Insert_AdSearchPosition(kw);
+                } catch(DBConnectionException e)
+                {
+                    Console.WriteLine("Ошибка БД");
+                }  
+                          
+                           
 
             }
 

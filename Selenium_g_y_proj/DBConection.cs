@@ -8,6 +8,10 @@ namespace Selenium_g_y_proj
 {
     class DBConection
     {
+        public class DBConnectionException:Exception
+        {
+
+        }
         public class DBKeyword
         {
             public string keyword { get; set; }
@@ -32,28 +36,35 @@ namespace Selenium_g_y_proj
         public Boolean isExist_AdSearchPosition(Keyword keyword)
         {
             if (!this.OpenConnection())
-                return false;
+                throw new DBConnectionException();
 
-            Console.WriteLine("Проверяем в бд " + keyword.toString());
+            Console.WriteLine("Проверяем в бд [" + keyword.toString()+"]");
 
             int Count = -1;
 
             try
             {
-                string query = "SELECT Count(*) FROM `adsearchpostions` WHERE `Keywords_id`=@Keywords_id and `search_engine`=@search_engine and `positions`=@positions";
+                string query = "SELECT Count(*) as count FROM `adsearchpostions` WHERE `Keywords_id`=@Keywords_id and `search_engine`=@search_engine and `positions`=@positions and `description`=\"@description\"";
 
                 MySqlCommand cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@Keywords_id", keyword.keyword_id);
                 cmd.Parameters.AddWithValue("@search_engine", keyword.search_engine);
                 cmd.Parameters.AddWithValue("@positions", keyword.position);
+                cmd.Parameters.AddWithValue("@description", keyword.description);
 
-                Count = int.Parse(cmd.ExecuteScalar() + "");
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    Count = dataReader.GetInt32("count");
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
             this.CloseConnection();
+            Console.WriteLine("Кол-во в БД!![" + Count+"]");
             return Count > 0;
         }
 
@@ -61,14 +72,14 @@ namespace Selenium_g_y_proj
         {
 
             if (!this.OpenConnection())
-                return;
+                throw new DBConnectionException();
 
             try
             {
                 string replacement = "";
                 Regex rgx = new Regex("['\"]");
 
-                Console.WriteLine("Добавляем в бд " + keyword.toString());
+                Console.WriteLine("Добавляем в бд [" + keyword.toString()+"]");
                 string query = "INSERT INTO `adsearchpostions` " +
                     "(`AdSearchPostions_site_id`, `description`, `positions`, `search_engine`, `Keywords_id`,`created_at`,`updated_at`,`is_ad`,`region_id`) VALUES " +
                     "(@AdSearchPostions_site_id,@description,@positions,@search_engine,@Keywords_id,@created_at,@updated_at,@is_ad,@region_id)";
@@ -228,7 +239,7 @@ namespace Selenium_g_y_proj
 
                 while (dataReader.Read())
                 {
-                    site_id = dataReader.GetInt32("id");
+                    site_id = dataReader.GetInt32("site_id");
                 }
                 dataReader.Close();
 

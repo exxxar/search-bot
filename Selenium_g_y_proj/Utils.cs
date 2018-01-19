@@ -54,7 +54,7 @@ namespace Selenium_g_y_proj
             }
             while (!driver.ExecuteScript("return document.readyState").Equals("complete"))
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(100);
             }
         }
 

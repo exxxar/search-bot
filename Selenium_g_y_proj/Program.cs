@@ -16,7 +16,7 @@ namespace Selenium_g_y_proj
 
         static void Main(string[] args)
         {
-            
+           
             int offset = 0;
             int limit = STEP;
             int threadsCount = 3;
